@@ -6,7 +6,7 @@ function Header({ popupEnabled, onTogglePopup }) {
       <div className="header-content">
         <div className="logo" id="logo">
           <span className="logo-icon" id="logo-icon" aria-hidden="true">✓</span>
-          <h1 id="app-title">TODO</h1>
+          <h1 id="app-title">ONYU</h1>
         </div>
 
         <div className="header-actions">
