@@ -1,5 +1,6 @@
 import { useState, useEffect, useMemo } from 'react';
 import Intro from './components/Intro';
+import Login from './components/Login';
 import Header from './components/Header';
 import TodoForm from './components/TodoForm';
 import FilterBar from './components/FilterBar';
@@ -11,6 +12,7 @@ import './App.css';
 
 function App() {
   const [showIntro, setShowIntro] = useState(true);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [todos, setTodos] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -118,6 +120,10 @@ function App() {
 
   if (showIntro) {
     return <Intro onComplete={() => setShowIntro(false)} />;
+  }
+
+  if (!isLoggedIn) {
+    return <Login onLogin={() => setIsLoggedIn(true)} />;
   }
 
   return (
