@@ -1,6 +1,28 @@
 import { useState } from 'react';
 import './Login.css';
 
+// 쿠키 유틸리티 함수
+export const setCookie = (name, value, days = 7) => {
+  const expires = new Date();
+  expires.setTime(expires.getTime() + days * 24 * 60 * 60 * 1000);
+  document.cookie = `${name}=${value};expires=${expires.toUTCString()};path=/`;
+};
+
+export const getCookie = (name) => {
+  const nameEQ = name + '=';
+  const ca = document.cookie.split(';');
+  for (let i = 0; i < ca.length; i++) {
+    let c = ca[i];
+    while (c.charAt(0) === ' ') c = c.substring(1, c.length);
+    if (c.indexOf(nameEQ) === 0) return c.substring(nameEQ.length, c.length);
+  }
+  return null;
+};
+
+export const deleteCookie = (name) => {
+  document.cookie = `${name}=;expires=Thu, 01 Jan 1970 00:00:01 GMT;path=/`;
+};
+
 function Login({ onLogin }) {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
@@ -17,6 +39,8 @@ function Login({ onLogin }) {
     }
 
     if (username === 'admin' && password === 'admin1!') {
+      // 로그인 성공 시 쿠키 저장 (7일간 유지)
+      setCookie('todo_user', username, 7);
       setFadeOut(true);
       setTimeout(onLogin, 400);
     } else {

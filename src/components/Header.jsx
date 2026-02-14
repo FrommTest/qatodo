@@ -1,6 +1,6 @@
 import './Header.css';
 
-function Header({ popupEnabled, onTogglePopup }) {
+function Header({ popupEnabled, onTogglePopup, onLogout }) {
   return (
     <header id="app-header" className="header" role="banner">
       <div className="header-content">
@@ -27,6 +27,16 @@ function Header({ popupEnabled, onTogglePopup }) {
             >
               {popupEnabled ? 'ON' : 'OFF'}
             </span>
+          </button>
+
+          <button
+            id="logout-btn"
+            className="logout-btn"
+            onClick={onLogout}
+            aria-label="로그아웃"
+          >
+            <span className="logout-icon" aria-hidden="true">⏻</span>
+            <span className="logout-label">로그아웃</span>
           </button>
         </div>
       </div>

@@ -1,6 +1,7 @@
 import { useState, useEffect, useMemo } from 'react';
+import { Routes, Route, Navigate, useNavigate, useLocation } from 'react-router-dom';
 import Intro from './components/Intro';
-import Login from './components/Login';
+import Login, { getCookie, deleteCookie } from './components/Login';
 import Header from './components/Header';
 import TodoForm from './components/TodoForm';
 import FilterBar from './components/FilterBar';
@@ -10,9 +11,8 @@ import RandomPopup from './components/RandomPopup';
 import todoApi from './api/todoApi';
 import './App.css';
 
-function App() {
-  const [showIntro, setShowIntro] = useState(true);
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
+// 홈 컴포넌트 (메인 TODO 화면)
+function Home({ onLogout }) {
   const [todos, setTodos] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -22,14 +22,12 @@ function App() {
   const [actionCount, setActionCount] = useState(0);
   const [popupEnabled, setPopupEnabled] = useState(false);
 
-  // 액션 트리거 (랜덤 팝업용)
   const triggerAction = () => {
     if (popupEnabled) {
       setActionCount(prev => prev + 1);
     }
   };
 
-  // Fetch todos on mount
   useEffect(() => {
     fetchTodos();
   }, []);
@@ -93,11 +91,9 @@ function App() {
     }
   };
 
-  // Filter and search todos
   const filteredTodos = useMemo(() => {
     let result = [...todos];
 
-    // Apply filter
     if (filter === 'completed') {
       result = result.filter(t => t.completed);
     } else if (filter === 'pending') {
@@ -106,7 +102,6 @@ function App() {
       result = result.filter(t => t.priority === 'HIGH' && !t.completed);
     }
 
-    // Apply search
     if (searchKeyword.trim()) {
       const keyword = searchKeyword.toLowerCase();
       result = result.filter(t =>
@@ -118,19 +113,12 @@ function App() {
     return result;
   }, [todos, filter, searchKeyword]);
 
-  if (showIntro) {
-    return <Intro onComplete={() => setShowIntro(false)} />;
-  }
-
-  if (!isLoggedIn) {
-    return <Login onLogin={() => setIsLoggedIn(true)} />;
-  }
-
   return (
     <div id="app" className="app" role="application" aria-label="TODO 앱">
       <Header
         popupEnabled={popupEnabled}
         onTogglePopup={() => setPopupEnabled(prev => !prev)}
+        onLogout={onLogout}
       />
 
       <main id="main-content" className="main-content" role="main">
@@ -198,6 +186,57 @@ function App() {
 
       <RandomPopup triggerCount={actionCount} />
     </div>
+  );
+}
+
+// 메인 App 컴포넌트
+function App() {
+  const [showIntro, setShowIntro] = useState(true);
+  const [isLoggedIn, setIsLoggedIn] = useState(() => {
+    return !!getCookie('todo_user');
+  });
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  const handleLogin = () => {
+    setIsLoggedIn(true);
+    navigate('/');
+  };
+
+  const handleLogout = () => {
+    deleteCookie('todo_user');
+    setIsLoggedIn(false);
+    navigate('/login');
+  };
+
+  // 인트로 화면
+  if (showIntro) {
+    return <Intro onComplete={() => setShowIntro(false)} />;
+  }
+
+  return (
+    <Routes>
+      <Route
+        path="/login"
+        element={
+          isLoggedIn ? (
+            <Navigate to="/" replace />
+          ) : (
+            <Login onLogin={handleLogin} />
+          )
+        }
+      />
+      <Route
+        path="/"
+        element={
+          isLoggedIn ? (
+            <Home onLogout={handleLogout} />
+          ) : (
+            <Navigate to="/login" replace />
+          )
+        }
+      />
+    </Routes>
   );
 }
 
